@@ -1,0 +1,244 @@
+syntax = "proto2";
+package com.octopus.bidder.api.openrtb;
+
+option java_outer_classname = "Zy_Proto";
+
+message Request {
+  //版本号
+  required int32      version        = 1;
+
+  // 此请求的唯一id
+  required string     id             = 2;
+
+  // 可展示的位置
+  message Impression  {
+    // 此impression在当前Request中的唯一id,从0开始
+    required int32  id        = 1;
+
+    // 广告位id, 由章鱼方运营分配
+    required string pid       = 2;
+
+    //广告位的宽和高
+    optional int32  width     = 3;
+    optional int32  height    = 4;
+
+    // RTB的底价，非RTB方式可不填, 单位：分
+    optional int32  bid_floor = 5;
+
+  }
+  repeated Impression imp            = 3;
+
+  // 设备信息
+  message Device {
+    // ipv4 点分十进制, 必须为终端真实IP地址
+    optional string ip             = 1;
+
+    // ipv6 点分十进制, 必须为终端真实IP地址
+    optional string ipv6           = 2;
+
+    // user agent，来自http头
+    optional string user_agent     = 3;
+
+    // IOS6.0及以上的idfa号
+    optional string idfa           = 4;
+
+    // 安卓设备的imei号
+    optional string imei           = 5;
+
+    // 安卓设备的imei号的md5值,若填写imei原值，则不用填此字段
+    optional string imei_md5       = 6;
+
+    // 设备的mac地址
+    optional string mac            = 7;
+
+    // 设备的mac地址的md5值, 若填写mac原值，则不用填此字段
+    optional string mac_md5        = 8;
+
+    // 设备类型，0-手机;1-平板;2-PC;3-互联网电视
+    optional int32  device_type    = 9;
+
+    // 设备品牌
+    // 例如：nokia, samsung
+    optional string brand          = 10;
+
+    // 设备型号
+    // 例如：n70, galaxy
+    optional string model          = 11;
+
+    // 操作系统
+    // 例如：Android,iOS
+    optional string os             = 12;
+
+    // 操作系统版本
+    // 例如：7.0.2
+    optional string osv            = 13;
+
+    // 设备所处网络环境 0-未识别, 1-wifi, 2-2g, 3-3g, 4-4g
+    optional int32  network        = 14 [default = 1];
+
+    // 设备的网络运营商 0-未知, 1-移动, 2-联通, 3-电信
+    optional int32  operator       = 15;
+
+    // 设备屏幕尺寸：宽
+    optional int32  width          = 16;
+
+    // 设备屏幕尺寸：高
+    optional int32  height         = 17;
+
+    // 设备密度，对应于pixel_ratio
+    optional int32  pixel_ratio    = 18 [default = 1000];
+
+    message Geo {
+      // 纬度, 取值范围[-90.0 , +90.0]
+      optional double lat = 1;
+      // 经度, 取值范围[-180.0 , +180.0]
+      optional double lon = 2;
+    }
+    optional Geo    geo            = 21;
+
+    // 用户已安装 app 列表
+    repeated string installed_app  = 22;
+
+    // oaid
+    optional string oaid           = 23;
+
+    // 广协CAID
+    optional string caid           = 25;
+
+    // 系统启动标识
+    optional string boot_mark      = 26;
+
+    // 系统更新标识
+    optional string update_mark    = 27;
+
+    // 原始IDFA的md5值，md5后的大写形式
+    optional string idfa_md5       = 28;
+
+    // 原始OAID(不做大小写转换)的md5值，md5后的大写形式
+    optional string oaid_md5       = 29;
+
+    // android_id
+    optional string android_id     = 30;
+
+    // android_id_md5
+    optional string android_id_md5 = 31;
+    //paid
+    optional string paid           = 32;
+
+    optional string caidver        = 33;
+
+    optional string caid2          = 34;
+
+    optional string caid2ver       = 35;
+
+  }
+  optional Device     device         = 5;
+
+  // APP属性
+  message App {
+    // 应用包名
+    optional string package_name = 1;
+
+    // 应用名
+    optional string app_name     = 2;
+
+    // app版本号
+    optional string version      = 3;
+
+  }
+  optional App        app            = 6;
+
+  // 是否必须返回https广告
+  optional bool       https_required = 10 [default = false];
+}
+
+message Response {
+  //对应Request中的id
+  optional string id     = 1;
+
+  // 0-ok，其他值表示无广告返回
+  optional int32  status = 2 [default = 0];
+
+  // 一个位置上的广告
+  message Seat {
+    // 指定请求里的impression id
+    required int32 id = 1;
+
+    // 广告字段
+    message Ad {
+      // 广告序号，为0
+      required int32      id                      = 1;
+
+      // 创意类型
+      // 1 文字 2 图片 3 Flash 4 视频
+      optional int32      creative_type           = 3;
+
+      // 展现反馈地址
+      repeated string     impression_tracking_url = 6;
+
+      // 点击跳转地址(落地页)
+      optional string     click_through_url       = 7;
+
+      // 点击跟踪地址
+      repeated string     click_tracking_url      = 8;
+
+      message NativeAd {
+        // 属性（描述）信息
+        message Attr{
+          // 属性名
+          required string name  = 1;
+
+          // 属性值
+          required string value = 2;
+        }
+        repeated Attr attr = 1;
+      }
+      optional NativeAd   native_ad               = 10;
+
+      //广告创意的唯一标识
+      optional string     creative_id             = 11;
+
+      //广告来源
+      optional string     ad_source               = 12;
+
+      //APP唤醒地址
+      optional string     deeplink_url            = 13;
+
+      //APP下载地址
+      optional string     download_url            = 14;
+
+      //返回报价供上游adx竞价, 单位(分)
+      optional int32      bid_price               = 15;
+      // 事件监测url
+      message EventTrack {
+        optional uint32 type = 1;
+        repeated string url  = 2;
+      }
+      repeated EventTrack event_track             = 16;
+      // 落地页打开方式：1是打开网页(包含deeplink) 2 点击下载
+      optional int32      open_type               = 17;
+      // 竞价成功通知，服务端发送
+      optional string     winnotice_url           = 18;
+      // 应用包名
+      optional string     package_name            = 19;
+      // 应用名
+      optional string     app_name                = 20;
+      /**
+       * 下载类相关信息
+       */
+      optional string     app_desc                = 21;//app描述
+      optional string     app_download_url        = 22;//下载地址
+      optional string     permissions_url         = 23;//权限名称及权限描述列表
+      optional string     function_desc_url       = 24;//产品功能url
+      optional string     privacy_url             = 25;//隐私协议
+      optional string     developer_name          = 26;//开发者公司名称
+      optional string     app_version             = 27;//应用版本号
+      optional string     app_icon_url            = 28;//App图标链接
+      optional int64      app_size                = 29;//app大小
+      optional string     file_md5                = 30;//app文件md5
+    }
+    repeated Ad    ad = 2;
+
+  }
+  repeated Seat   seat   = 3;
+}
